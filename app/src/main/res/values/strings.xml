@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Fetch Coding Exercise</string>
+    <string name="loading_dialog_msg">Loading data...</string>
+    <string name="list_id_label_text">List ID:</string>
+    <string name="id_label_text">ID:</string>
+    <string name="name_label_text">Name:</string>
+</resources>
