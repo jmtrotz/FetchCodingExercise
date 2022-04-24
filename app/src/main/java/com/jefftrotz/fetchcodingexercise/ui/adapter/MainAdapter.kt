@@ -46,6 +46,11 @@ class MainAdapter(private val itemList: List<Item>):
                 ContextCompat.getColor(
                     holder.itemView.context,
                     R.color.light_grey))
+        } else {
+            holder.itemView.setBackgroundColor(
+                ContextCompat.getColor(
+                    holder.itemView.context,
+                    R.color.white))
         }
 
         holder.textViewListId.text = item.listId.toString()
