@@ -1,7 +1,11 @@
 <resources>
     <string name="app_name">Fetch Coding Exercise</string>
-    <string name="loading_dialog_msg">Loading data...</string>
+    <string name="loading_dialog_message">Loading data...</string>
     <string name="list_id_label_text">List ID:</string>
     <string name="id_label_text">ID:</string>
     <string name="name_label_text">Name:</string>
+    <string name="offline_alert_dialog_title">Device Offline</string>
+    <string name="offline_alert_dialog_message">Please ensure Airplane Mode is off and WiFi or mobile data are enabled."</string>
+    <string name="offline_alert_dialog_positive_button_text">TRY AGAIN</string>
+    <string name="offline_alert_dialog_negative_button_text">CANCEL</string>
 </resources>

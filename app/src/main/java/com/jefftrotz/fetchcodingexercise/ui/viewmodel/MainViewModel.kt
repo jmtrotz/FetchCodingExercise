@@ -1,5 +1,6 @@
 package com.jefftrotz.fetchcodingexercise.ui.viewmodel
 
+import androidx.lifecycle.ViewModel
 import com.jefftrotz.fetchcodingexercise.data.model.Item
 import com.jefftrotz.fetchcodingexercise.data.repository.MainRepository
 import com.jefftrotz.fetchcodingexercise.util.ListUtils
@@ -9,7 +10,7 @@ import kotlin.collections.ArrayList
  * Main ViewModel for this application. Acts as a link
  * between the MainActivity and the MainRepository.
  */
-class MainViewModel {
+class MainViewModel: ViewModel() {
     private var mItemList: List<Item> = ArrayList()
 
     /**

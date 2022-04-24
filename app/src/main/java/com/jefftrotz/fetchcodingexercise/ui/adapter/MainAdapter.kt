@@ -14,8 +14,10 @@ import com.jefftrotz.fetchcodingexercise.databinding.RecyclerViewRowBinding
  */
 class MainAdapter(private val itemList: List<Item>):
     RecyclerView.Adapter<MainAdapter.ViewHolder>() {
-    inner class ViewHolder(val binding: RecyclerViewRowBinding):
-        RecyclerView.ViewHolder(binding.root)
+    class ViewHolder(binding: RecyclerViewRowBinding): RecyclerView.ViewHolder(binding.root) {
+        val textViewListId = binding.textViewListId
+        val textViewName = binding.textViewName
+    }
 
     /**
      * Called when the RecyclerView needs a new ViewHolder.
@@ -25,11 +27,10 @@ class MainAdapter(private val itemList: List<Item>):
      * @return A new ViewHolder that holds a View of the given view type.
      */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = RecyclerViewRowBinding.inflate(
+        return ViewHolder(RecyclerViewRowBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
-            false)
-        return ViewHolder(binding)
+            false))
     }
 
     /**
@@ -38,20 +39,17 @@ class MainAdapter(private val itemList: List<Item>):
      * @param position The position of the item within the adapter's data set.
      */
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        with(holder) {
-            with(itemList[position]) {
-                if (position % 2 == 0) {
-                    binding.constraintLayoutMain.setBackgroundColor(
-                        ContextCompat.getColor(
-                            holder.itemView.context,
-                            R.color.light_grey
-                        ))
-                }
+        val item = itemList[position]
 
-                binding.textViewListId.text = this.listId.toString()
-                binding.textViewName.text = this.name
-            }
+        if (position % 2 == 0) {
+            holder.itemView.setBackgroundColor(
+                ContextCompat.getColor(
+                    holder.itemView.context,
+                    R.color.light_grey))
         }
+
+        holder.textViewListId.text = item.listId.toString()
+        holder.textViewName.text = item.name
     }
 
     /**

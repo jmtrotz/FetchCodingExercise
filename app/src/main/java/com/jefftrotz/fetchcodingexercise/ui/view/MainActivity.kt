@@ -1,19 +1,24 @@
 package com.jefftrotz.fetchcodingexercise.ui.view
 
 import android.app.Dialog
+import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AlertDialog
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jefftrotz.fetchcodingexercise.R
 import com.jefftrotz.fetchcodingexercise.data.model.Item
 import com.jefftrotz.fetchcodingexercise.databinding.ActivityMainBinding
 import com.jefftrotz.fetchcodingexercise.ui.adapter.MainAdapter
 import com.jefftrotz.fetchcodingexercise.ui.viewmodel.MainViewModel
-import kotlinx.coroutines.*
+import com.jefftrotz.fetchcodingexercise.util.executeAsyncTask
 
 /**
  * Main Activity for this application. Displays a list
@@ -40,14 +45,11 @@ class MainActivity : AppCompatActivity() {
         mBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(mBinding?.root)
 
-        lifecycleScope.executeAsyncTask(onPreExecute = {
-            showLoadingDialog()
-        }, doInBackground = {
-            mItemList = MainViewModel().getItems()
-        }, onPostExecute = {
-            initializeRecyclerView()
-            dismissLoadingDialog()
-        })
+        if (isOnline(this)) {
+            fetchData()
+        } else {
+            showOfflineAlertDialog()
+        }
     }
 
     /**
@@ -57,6 +59,47 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         mBinding = null
+    }
+
+    /**
+     * Checks if the device has internet connectivity.
+     * @return Current connectivity state as a Boolean.
+     */
+    private fun isOnline(context: Context): Boolean {
+        val connectivityManager = context.getSystemService(
+            Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val capabilities = connectivityManager.getNetworkCapabilities(
+            connectivityManager.activeNetwork)
+
+        if (capabilities != null) {
+            when {
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
+                    return true
+                }
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
+                    return true
+                }
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
+                    return true
+                }
+            }
+        }
+
+        return false
+    }
+
+    /**
+     * Retrieves data to be displayed from the ViewModel
+     */
+    private fun fetchData() {
+        lifecycleScope.executeAsyncTask(onPreExecute = {
+            showLoadingDialog()
+        }, doInBackground = {
+            mItemList = MainViewModel().getItems()
+        }, onPostExecute = {
+            initializeRecyclerView()
+            dismissLoadingDialog()
+        })
     }
 
     /**
@@ -70,11 +113,37 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
+     * Shows an alert dialog informing the user that their device is offline.
+     */
+    private fun showOfflineAlertDialog() {
+        val dialogBuilder = MaterialAlertDialogBuilder(this, R.layout.dialog_background)
+        dialogBuilder.setTitle(R.string.offline_alert_dialog_title)
+        dialogBuilder.setMessage(R.string.offline_alert_dialog_message)
+        dialogBuilder.setPositiveButton(
+            R.string.offline_alert_dialog_positive_button_text) { dialogInterface, _ ->
+            if (isOnline(this)) {
+                dialogInterface.dismiss()
+                fetchData()
+            } else {
+                showOfflineAlertDialog()
+            }
+        }
+        dialogBuilder.setNegativeButton(
+            R.string.offline_alert_dialog_negative_button_text) { _, _ ->
+            finishAffinity()
+        }
+
+        val alertDialog: AlertDialog = dialogBuilder.create()
+        alertDialog.setCancelable(false)
+        alertDialog.show()
+    }
+
+    /**
      * Shows a dialog to inform the user that data is being loaded.
      */
     private fun showLoadingDialog() {
         mLoadingDialog = Dialog(this)
-        mLoadingDialog?.setContentView(R.layout.dialog_loading)
+        mLoadingDialog?.setContentView(R.layout.dialog_background)
         mLoadingDialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         mLoadingDialog?.show()
     }
@@ -87,23 +156,5 @@ class MainActivity : AppCompatActivity() {
             mLoadingDialog?.dismiss()
             mLoadingDialog = null
         }
-    }
-
-    /**
-     * Extension function to execute tasks before and after the background task has finished.
-     * @param onPreExecute A task to perform before the background task begins.
-     * @param doInBackground A task to perform in the background.
-     * @param onPostExecute A task to perform after the background task has finished.
-     */
-    private fun <R> CoroutineScope.executeAsyncTask(
-        onPreExecute: () -> Unit,
-        doInBackground: () -> R,
-        onPostExecute: (R) -> Unit
-    ) = launch {
-        onPreExecute()
-        val result = withContext(Dispatchers.IO) {
-            doInBackground()
-        }
-        onPostExecute(result)
     }
 }
