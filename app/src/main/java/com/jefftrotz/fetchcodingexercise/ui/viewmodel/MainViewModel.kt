@@ -1,33 +1,50 @@
 package com.jefftrotz.fetchcodingexercise.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.jefftrotz.fetchcodingexercise.data.model.Item
-import com.jefftrotz.fetchcodingexercise.data.repository.MainRepository
-import com.jefftrotz.fetchcodingexercise.util.ListUtils
-import kotlin.collections.ArrayList
+import androidx.lifecycle.viewModelScope
+import com.jefftrotz.fetchcodingexercise.model.Result
+import com.jefftrotz.fetchcodingexercise.model.Item
+import com.jefftrotz.fetchcodingexercise.repository.MainRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.launch
 
 /**
  * Main ViewModel for this application. Acts as a link
  * between the MainActivity and the MainRepository.
  */
-class MainViewModel: ViewModel() {
-    private var mItemList: List<Item> = ArrayList()
+class MainViewModel(
+    private val mainRepository: MainRepository
+): ViewModel() {
+    private val _items = MutableStateFlow<List<Item>?>(null)
+    val items: StateFlow<List<Item>?> = _items
 
-    /**
-     * Initializes the mItemList variable with
-     * data returned by the MainRepository.
-     */
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val _errorMessage = MutableStateFlow("")
+    val errorMessage: StateFlow<String> = _errorMessage
+
     init {
-        mItemList = MainRepository().getItems()
-    }
-
-    /**
-     * Gets a List of Item objects sorted by their
-     * listId and name properties from ListUtils.
-     * @return A List of Item objets.
-     * @see ListUtils
-     */
-    fun getItems(): List<Item> {
-        return ListUtils().cleanUpList(mItemList)
+        viewModelScope.launch(Dispatchers.IO) {
+            mainRepository.getRemoteData().collect {
+                when (it) {
+                    is Result.Loading -> {
+                        _isLoading.emit(true)
+                    }
+                    is Result.Success -> {
+                        _isLoading.emit(false)
+                        _items.emit(it.value())
+                    }
+                    is Result.Error -> {
+                        _isLoading.emit(false)
+                        _errorMessage.emit("Failed to download data")
+                    }
+                }
+            }
+        }
     }
 }

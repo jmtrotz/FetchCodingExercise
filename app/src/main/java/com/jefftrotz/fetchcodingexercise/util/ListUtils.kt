@@ -1,6 +1,6 @@
 package com.jefftrotz.fetchcodingexercise.util
 
-import com.jefftrotz.fetchcodingexercise.data.model.Item
+import com.jefftrotz.fetchcodingexercise.model.Item
 
 /**
  * Utilities for cleaning up a List of Item objects. Removes blank/null names
@@ -24,7 +24,7 @@ class ListUtils {
      * @return A List of Item objects whose name property is not blank or null.
      */
     private fun filterNames(itemList: List<Item>): List<Item> {
-        return itemList.filterNot {item -> item.name.isBlank() || item.name == "null" }
+        return itemList.filterNot { item -> item.name.isBlank() || item.name == "null" }
     }
 
     /**

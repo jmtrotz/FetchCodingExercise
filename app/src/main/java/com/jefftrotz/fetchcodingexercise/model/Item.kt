@@ -1,4 +1,4 @@
-package com.jefftrotz.fetchcodingexercise.data.model
+package com.jefftrotz.fetchcodingexercise.model
 
 /**
  * Item object model.

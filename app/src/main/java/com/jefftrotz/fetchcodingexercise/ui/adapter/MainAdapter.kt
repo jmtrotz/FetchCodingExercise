@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.jefftrotz.fetchcodingexercise.R
-import com.jefftrotz.fetchcodingexercise.data.model.Item
+import com.jefftrotz.fetchcodingexercise.model.Item
 import com.jefftrotz.fetchcodingexercise.databinding.RecyclerViewRowBinding
 
 /**
